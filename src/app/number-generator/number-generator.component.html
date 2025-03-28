@@ -1,0 +1,42 @@
+<div class="scroll-container">
+  <div class="row m-2">
+    <div class="col-3">
+      <input
+        class="form-control form-control-sm"
+        id="filterNumber"
+        type="number"
+        [(ngModel)]="filterNumber"
+        (ngModelChange)="filterNumbers()"
+        placeholder="Filter"
+      />
+    </div>
+    /
+    <div class="col-3">
+      <input
+        class="form-control form-control-sm"
+        id="inputNumber"
+        type="number"
+        [(ngModel)]="inputNumber"
+        (ngModelChange)="generateNumbers()"
+        placeholder="Number"
+      />
+    </div>
+    <div>
+      <button class="btn btn-primary mt-2" (click)="addNumbers()">
+        Add 15 Elements
+      </button>
+    </div>
+    <h1>{{ title }}</h1>
+    <cdk-virtual-scroll-viewport itemSize="50" class="viewport">
+      <table>
+        <tbody>
+          <tr *ngFor="let row of groupedNumbers">
+            <td *ngFor="let number of row" [ngStyle]="getCellStyle(number)">
+              {{ number }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </cdk-virtual-scroll-viewport>
+  </div>
+</div>
