@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-number-generator',
@@ -7,62 +8,62 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NumberGeneratorComponent {
-  filterNumber!: number;
-  inputNumber!: number;
-  generatedNumbers: string[] = [];
-  groupedNumbers: string[][] = [];
+  filterNumberSubject = new BehaviorSubject<string>('');
+  inputNumberSubject = new BehaviorSubject<number>(0);
+
+  numbers$ = this.inputNumberSubject.pipe(
+    map((count) => this.generateNumbers(count))
+  );
+
+  filteredNumbers$ = combineLatest([
+    this.numbers$,
+    this.filterNumberSubject,
+  ]).pipe(
+    map(([numbers, filter]) => {
+      if (filter) {
+        return numbers.filter((num) => num.includes(filter));
+      }
+      return numbers;
+    })
+  );
+
   title: string = 'FizzBuzz';
 
-  generateNumbers(): void {
-    this.generatedNumbers = [];
-    if (this.inputNumber > 0) {
-      for (let i = 1; i <= this.inputNumber; i++) {
-        this.addToGeneratedList(i);
-      }
-      this.groupNumbers();
-    }
+  generateNumbers(count: number): string[] {
+    return Array.from({ length: count }, (_, i) => this.getText(i + 1));
   }
 
-  addToGeneratedList(i: number): void {
+  getText(i: number): string {
     if (i % 3 === 0 && i % 5 === 0) {
-      this.generatedNumbers.push('FizzBuzz');
+      return 'FizzBuzz';
     } else if (i % 3 === 0) {
-      this.generatedNumbers.push('Fizz');
+      return 'Fizz';
     } else if (i % 5 === 0) {
-      this.generatedNumbers.push('Buzz');
+      return 'Buzz';
     } else {
-      this.generatedNumbers.push(i.toString());
+      return i.toString();
     }
   }
 
-  groupNumbers(): void {
-    this.groupedNumbers = [];
-    for (let i = 0; i <= this.generatedNumbers.length; i += 15) {
-      this.groupedNumbers.push(this.generatedNumbers.slice(i, i + 15));
+  updateCount(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = inputElement?.value ?? '';
+
+    if (Number(value) > 0) {
+      this.inputNumberSubject.next(Number(value));
     }
+  }
+
+  filterNumbers(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = inputElement?.value ?? '';
+
+    this.filterNumberSubject.next(value);
   }
 
   addNumbers(): void {
-    const currentLength = this.generatedNumbers.length;
-    const nextNumber = currentLength + 1;
-    const endNumber = nextNumber + 14;
-    console.log(this.filterNumber);
-
-    for (let i = nextNumber; i <= endNumber; i++) {
-      this.addToGeneratedList(i);
-    }
-    this.groupNumbers();
-  }
-
-  filterNumbers(): void {
-    if (this.filterNumber > 0) {
-      this.generatedNumbers = this.generatedNumbers.filter((number) => {
-        return number.includes(this.filterNumber.toString());
-      });
-      this.groupNumbers();
-    } else {
-      this.generateNumbers();
-    }
+    const currentNumbers = this.inputNumberSubject.value;
+    this.inputNumberSubject.next(currentNumbers + 15);
   }
 
   getCellStyle(number: string): object {

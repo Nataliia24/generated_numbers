@@ -4,9 +4,8 @@
       <input
         class="form-control form-control-sm"
         id="filterNumber"
-        type="number"
-        [(ngModel)]="filterNumber"
-        (ngModelChange)="filterNumbers()"
+        type="text"
+        (input)="filterNumbers($event)"
         placeholder="Filter"
       />
     </div>
@@ -16,8 +15,7 @@
         class="form-control form-control-sm"
         id="inputNumber"
         type="number"
-        [(ngModel)]="inputNumber"
-        (ngModelChange)="generateNumbers()"
+        (input)="updateCount($event)"
         placeholder="Number"
       />
     </div>
@@ -30,8 +28,11 @@
     <cdk-virtual-scroll-viewport itemSize="50" class="viewport">
       <table>
         <tbody>
-          <tr *ngFor="let row of groupedNumbers">
-            <td *ngFor="let number of row" [ngStyle]="getCellStyle(number)">
+          <tr>
+            <td
+              *ngFor="let number of filteredNumbers$ | async"
+              [ngStyle]="getCellStyle(number)"
+            >
               {{ number }}
             </td>
           </tr>
